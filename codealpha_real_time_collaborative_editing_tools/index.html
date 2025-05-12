@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=poppins&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="ccc.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="options">
+            <!-- text format -->
+            <button id="bold" class="option-button format">
+                <i class="fa fa-bold"></i>
+            </button>
+            <button id="italic" class="option-button format">
+                <i class="fa fa-italic"></i>
+            </button>
+            <button id="underline" class="option-button format">
+                <i class="fa fa-underline"></i>
+            </button>
+            <button id="strikethrough" class="option-button format">
+                <i class="fa fa-strikethrough"></i>
+            </button>
+            <button id="superscript" class="option-button format">
+                <i class="fa fa-superscript"></i>
+            </button>
+            <button id="subscript" class="option-button format">
+                <i class="fa fa-subscript"></i>
+            </button>
+
+            <!-- list -->
+            <button id="insertOrderedList" class="option-button">
+                <div class="fa fa-list-ol"></div>
+            </button>
+            <button id="insertUnorderedList" class="option-button">
+                <i class="fa fa-list"></i>
+            </button>
+
+            <!-- undo/redo -->
+            <button id="undo" class="option-button">
+                <i class="fa fa-rotate-left"></i>
+            </button>
+            <button id="redo" class="option-button">
+                <i class="fa fa-rotate-right"></i>
+            </button>
+
+            <!-- link -->
+            <button id="createLink" class="adv-option-button">
+                <i class="fa fa-link"></i>
+            </button>
+            <button id="unlink" class="option-button">
+                <i class="fa fa-unlink"></i>
+            </button>
+
+            <!-- alignment -->
+            <button id="justifyLeft" class="option-button align">
+                <i class="fa fa-align-left"></i>
+            </button>
+            <button id="justifyCenter" class="option-button align">
+                <i class="fa fa-align-center"></i>
+            </button>
+            <button id="justifyRight" class="option-button align">
+                <i class="fa fa-align-right"></i>
+            </button>
+            <button id="justifyFull" class="option-button align">
+                <i class="fa fa-align-justify"></i>
+            </button>
+            <button id="indent" class="option-button spacing">
+                <i class="fa fa-indent"></i>
+            </button>
+            <button id="outdent" class="option-button spacing">
+                <i class="fa fa-outdent"></i>
+            </button>
+
+            <!-- headings -->
+            <select id="formatBlock" class="adv-option-button">
+                <option value="h1">h1</option>
+                <option value="h2">h2</option>
+                <option value="h3">h3</option>
+                <option value="h4">h4</option>
+                <option value="h5">h5</option>
+                <option value="h6">h6</option>
+            </select>
+
+            <!-- font -->
+            <select id="fontname" class="adv-option-button">
+                <option value="Arial">Arial</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Garamond">Garamond</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Courier New">Courier New</option>
+                <option value="cursive">cursive</option>
+            </select>
+
+            <!-- font size -->
+            <select id="fontsize" class="adv-option-button">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+            </select>
+
+            <!-- color -->
+            <div class="input-wrapper">
+                <input type="color" id="forecolor" class="adv-option-button">
+                <label for="forecolor">Font color</label>
+            </div>
+            <div class="input-wrapper">
+                <input type="color" id="backcolor" class="adv-option-button">
+                <label for="backcolor">Highlight color</label>
+            </div>
+        </div>
+        <div id="text-input" contenteditable="true">
+
+        </div>
+
+        <!-- js script -->
+        <script>
+            let optionsButton = document.querySelectorAll(".option-button");
+            let advancedOptionsButton = document.querySelectorAll(".adv-option-button");
+            let fontName = document.getElementById("fontname");
+            let fontSizeRef = document.getElementById("fontsize");
+            let writingArea = document.getElementById("text-input");
+            let linkButton = document.getElementById("createLink");
+            let alignButtons = document.querySelectorAll(".align");
+            let spacingButtons = document.querySelectorAll(".spacing");
+            let formatButtons = document.querySelectorAll(".format");
+            let scriptButtons = document.querySelectorAll(".script");
+
+            // list of font names
+            let fontList = ["Arial", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
+
+            // initial settings
+            const initializer = () => {
+                // function calls for highlighting buttons
+                highlighter(alignButtons, true);
+                highlighter(spacingButtons, true);
+                highlighter(formatButtons, false);
+                highlighter(scriptButtons, true);
+
+                // create options for font names
+                fontList.map(value => {
+                    let option = document.createElement("option");
+                    option.value = value;
+                    option.innerHTML = value;
+                    fontName.appendChild(option);
+                });
+
+                // font size allows only till 7
+                for (let i = 1; i <= 7; i++) {
+                    let option = document.createElement("option");
+                    option.value = i;
+                    option.innerHTML = i;
+                    fontSizeRef.appendChild(option);
+                }
+
+                // default size
+                fontSizeRef.value = 3;
+            };
+
+            // main logic
+            const modifyText = (command, defaultUi, value) => {
+                // execCommand executes command on selected text
+                document.execCommand(command, defaultUi, value);
+            };
+
+            // for basic operations which don't need value parameter
+            optionsButton.forEach(button => {
+                button.addEventListener("click", () => {
+                    modifyText(button.id, false, null);
+                });
+            });
+
+            // options that require value parameter
+            advancedOptionsButton.forEach(button => {
+                button.addEventListener("change", () => {
+                    modifyText(button.id, false, button.value);
+                });
+            });
+
+            // link button
+            linkButton.addEventListener("click", () => {
+                let userLink = prompt("Enter a URL");
+                // if link has http then pass directly else add https
+                if (/http/i.test(userLink)) {
+                    modifyText(linkButton.id, false, userLink);
+                } else {
+                    userLink = "http://" + userLink;
+                    modifyText(linkButton.id, false, userLink);
+                }
+            });
+
+            // font color change
+            const forecolorInput = document.getElementById('forecolor');
+            forecolorInput.addEventListener('change', () => {
+                document.execCommand('styleWithCSS', false, `color: ${forecolorInput.value}`);
+            });
+
+            // font size change
+            const fontSizeInput = document.getElementById('fontsize');
+            fontSizeInput.addEventListener('change', () => {
+                document.execCommand('fontSize', false, fontSizeInput.value);
+            });
+
+            // highlight clicked button
+            const highlighter = (className, needsRemoval) => {
+                className.forEach(button => {
+                    button.addEventListener("click", () => {
+                        // needsRemoval = true means only one button should be highlighted and other would be normal
+                        if (needsRemoval) {
+                            let alreadyActive = false;
+
+                            // if currently clicked button is already active
+if (button.classList.contains("active")) {
+                                alreadyActive = true;
+                            }
+
+                            // remove highlight from other buttons
+                            highlighterRemover(className);
+                            if (!alreadyActive) {
+                                // highlight clicked button
+                                button.classList.add("active");
+                            }
+                        } else {
+                            // if other buttons can be highlighted
+                            button.classList.toggle("active");
+                        }
+                    });
+                });
+            };
+
+            const highlighterRemover = className => {
+                className.forEach(button => {
+                    button.classList.remove("active");
+                });
+            };
+
+            window.onload = initializer();
+        </script>
+    </body>
+</html>
